@@ -67,8 +67,7 @@ elif auth_option == "Login":
 # Show the app only after login
 if st.session_state.authenticated:
     st.success("✅ Login Successful!")
-    st.snow()
-
+    
     # TEXT ANALYSIS TOOL
     def analyze_text(text):
         char_count = len(text)
@@ -97,16 +96,17 @@ if st.session_state.authenticated:
     # Clear button
     with col1:
         if st.button("Clear"):
-            st.session_state.text_input = ""
-            st.session_state.submitted = False
-            st.rerun()
+            st.session_state.text_input = ""  # Clear the input text directly
+            st.session_state.submitted = False  # Reset submission status
+            st.experimental_rerun()  # Refresh the app to show the cleared input
 
     # Submit button
     with col2:
         if st.button("Submit"):
             st.session_state.text_input = text_input
             st.session_state.submitted = True
-            st.rerun()
+            st.snow()  # Trigger snow effect only on submit button click
+            st.experimental_rerun()  # Refresh the app to show results
 
     # Check if input text is provided and show analysis
     if st.session_state.submitted:
