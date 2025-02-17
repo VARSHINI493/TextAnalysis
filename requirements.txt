@@ -1,2 +1,5 @@
 streamlit
-hashlib
+rich
+markdown-it-py
+mdurl
+pygments
