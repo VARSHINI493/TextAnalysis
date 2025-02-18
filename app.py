@@ -61,7 +61,7 @@ if not st.session_state.authenticated:
         if st.button("Login"):
             if login(email, password):
                 st.session_state.authenticated = True
-                st.experimental_rerun()  # Immediate refresh
+                st.rerun()  # Immediate refresh
             else:
                 st.error("❌ Invalid Email or Password")
 
@@ -101,14 +101,14 @@ if st.session_state.authenticated:
             if st.button("Clear"):
                 st.session_state.text_input = ""
                 st.session_state.submitted = False
-                st.experimental_rerun()  # Ensures immediate refresh
+                st.rerun()  # Ensures immediate refresh
 
         # Submit button
         with cols[1]:
             if st.button("Submit"):
                 st.session_state.text_input = text_input
                 st.session_state.submitted = True
-                st.experimental_rerun()  # Refresh the app to show results
+                st.rerun()  # Refresh the app to show results
 
     # Results Display
     if st.session_state.submitted:
@@ -122,4 +122,4 @@ if st.session_state.authenticated:
             if st.button("Add New Text"):
                 st.session_state.text_input = ""
                 st.session_state.submitted = False
-                st.experimental_rerun()
+                st.rerun()
