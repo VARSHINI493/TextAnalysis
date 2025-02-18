@@ -2,6 +2,7 @@ import streamlit as st
 import sqlite3
 import hashlib
 import re
+import pandas as pd
 from collections import Counter
 
 st.set_page_config(page_title="Text Analysis App", page_icon="🔐")
@@ -42,31 +43,32 @@ if "text_input" not in st.session_state:
 st.title("🔐 Login & Signup Page")
 
 # Authentication System
-auth_option = st.radio("Choose an option:", ["Login", "Signup"])
+if not st.session_state.authenticated:
+    auth_option = st.radio("Choose an option:", ["Login", "Signup"])
 
-if auth_option == "Signup":
-    email = st.text_input("📧 Email")
-    password = st.text_input("🔑 Password", type="password")
-    if st.button("Signup"):
-        if signup(email, password):
-            st.success("✅ Account created successfully! Please login.")
-        else:
-            st.error("❌ Email already exists!")
+    if auth_option == "Signup":
+        email = st.text_input("📧 Email")
+        password = st.text_input("🔑 Password", type="password")
+        if st.button("Signup"):
+            if signup(email, password):
+                st.success("✅ Account created successfully! Please login.")
+            else:
+                st.error("❌ Email already exists!")
 
-elif auth_option == "Login":
-    email = st.text_input("📧 Email")
-    password = st.text_input("🔑 Password", type="password")
-    
-    if st.button("Login"):
-        if login(email, password):
-            st.session_state.authenticated = True
-            st.rerun()
-        else:
-            st.error("❌ Invalid Email or Password")
+    elif auth_option == "Login":
+        email = st.text_input("📧 Email")
+        password = st.text_input("🔑 Password", type="password")
+        
+        if st.button("Login"):
+            if login(email, password):
+                st.session_state.authenticated = True
+                st.rerun()
+            else:
+                st.error("❌ Invalid Email or Password")
 
-# Show the app only after login
+# Show the next screen after login
 if st.session_state.authenticated:
-    st.success("✅ Login Successful!")
+    st.success("✅ Login Successful! Redirecting to Text Analysis Tool...")
 
     # TEXT ANALYSIS TOOL
     def analyze_text(text):
@@ -78,46 +80,51 @@ if st.session_state.authenticated:
         sentence_count = len(sentences)
 
         word_freq = Counter(words)
-        repeated_words = {word: count for word, count in word_freq.items() if count > 1}
-
         single_word_repeated = sum(1 for count in word_freq.values() if count == 2)
         double_word_repeated = sum(1 for count in word_freq.values() if count == 3)
         triple_word_repeated = sum(1 for count in word_freq.values() if count == 4)
 
-        return char_count, word_count, sentence_count, single_word_repeated, double_word_repeated, triple_word_repeated
+        return {
+            "Total Characters": char_count,
+            "Total Words": word_count,
+            "Total Sentences": sentence_count,
+            "Single Word Repeated Count": single_word_repeated,
+            "Double Word Repeated Count": double_word_repeated,
+            "Triple Word Repeated Count": triple_word_repeated
+        }
 
     st.title("📊 Text Analysis Tool")
 
-    # Input section
-    text_input = st.text_area("Enter your text here:", value=st.session_state.text_input)
+    if not st.session_state.submitted:
+        # Input section
+        text_input = st.text_area("Enter your text here:", value=st.session_state.text_input)
 
-    col1, col2 = st.columns([1, 1])
+        # Buttons in a single row
+        cols = st.columns([2, 2, 2])
+        with cols[0]:
+            if st.button("Submit"):
+                st.session_state.text_input = text_input
+                st.session_state.submitted = True
+                st.snow()
+                st.rerun()
 
-    # Clear button
-    with col1:
-        if st.button("Clear"):
-            st.session_state.text_input = ""  # Clear the input text data
-            st.session_state.submitted = False  # Reset submission state
-            st.rerun()  # Refresh the app to show the cleared content
+        with cols[1]:
+            if st.button("Clear"):
+                st.session_state.text_input = ""
+                st.session_state.submitted = False
+                st.rerun()
 
-    # Submit button
-    with col2:
-        if st.button("Submit"):
-            st.session_state.text_input = text_input
-            st.session_state.submitted = True
-            st.snow()  # Trigger snow effect only on submit button click
-            st.rerun()  # Refresh the app to show results
-
-    # Check if input text is provided and show analysis
+    # Display results in a table
     if st.session_state.submitted:
-        if text_input.strip():
-            char_count, word_count, sentence_count, single_word_repeated, double_word_repeated, triple_word_repeated = analyze_text(text_input)
-
-            # Display Analysis Results
+        if st.session_state.text_input.strip():
+            results = analyze_text(st.session_state.text_input)
+            df = pd.DataFrame(results.items(), columns=["Metric", "Value"])
+            
             st.subheader("📌 Analysis Results")
-            st.write(f"📜 *Total Characters:* {char_count}")
-            st.write(f"📖 *Total Words:* {word_count}")
-            st.write(f"📝 *Total Sentences:* {sentence_count}")
-            st.write(f"🔄 *Single Word Repeated Count:* {single_word_repeated}")
-            st.write(f"🔁 *Double Word Repeated Count:* {double_word_repeated}")
-            st.write(f"🔂 *Triple Word Repeated Count:* {triple_word_repeated}")
+            st.dataframe(df, use_container_width=True)  # Display results in a table
+
+            # New button to restart analysis
+            if st.button("Add New Text"):
+                st.session_state.text_input = ""
+                st.session_state.submitted = False
+                st.rerun()
