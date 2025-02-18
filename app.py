@@ -106,9 +106,12 @@ if st.session_state.authenticated:
         # Submit button
         with cols[1]:
             if st.button("Submit"):
-                st.session_state.text_input = text_input
-                st.session_state.submitted = True
-                st.rerun()  # Refresh the app to show results
+                if not text_input.strip():  # Prevents empty submission
+                    st.warning("⚠️ Please enter some text before submitting.")
+                else:
+                    st.session_state.text_input = text_input
+                    st.session_state.submitted = True
+                    st.rerun()  # Refresh the app to show results
 
     # Results Display
     if st.session_state.submitted:
