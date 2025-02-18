@@ -92,7 +92,7 @@ if st.session_state.authenticated:
 
     # Input Section
     if not st.session_state.submitted:
-        text_input = st.text_area("Enter your text here:", value=st.session_state.text_input)
+        text_input = st.text_area("Enter your text here:", value=st.session_state.text_input, key="text_area")
 
         cols = st.columns([2, 2, 2])  # Closer button alignment
 
@@ -101,6 +101,7 @@ if st.session_state.authenticated:
             if st.button("Clear"):
                 st.session_state.text_input = ""
                 st.session_state.submitted = False
+                st.session_state.text_area = ""  # This resets the text input
                 st.rerun()  # Ensures immediate refresh
 
         # Submit button
@@ -122,4 +123,5 @@ if st.session_state.authenticated:
             if st.button("Add New Text"):
                 st.session_state.text_input = ""
                 st.session_state.submitted = False
+                st.session_state.text_area = ""  # Reset text input
                 st.rerun()
