@@ -99,9 +99,8 @@ if st.session_state.authenticated:
         # Clear button
         with cols[0]:
             if st.button("Clear"):
-                st.session_state.text_input = ""
+                st.session_state.text_input = ""  # ✅ Correct way to clear input
                 st.session_state.submitted = False
-                st.session_state.text_area = ""  # This resets the text input
                 st.rerun()  # Ensures immediate refresh
 
         # Submit button
@@ -121,7 +120,6 @@ if st.session_state.authenticated:
 
             # Add New Text Button
             if st.button("Add New Text"):
-                st.session_state.text_input = ""
+                st.session_state.text_input = ""  # ✅ Clears input for new text
                 st.session_state.submitted = False
-                st.session_state.text_area = ""  # Reset text input
                 st.rerun()
