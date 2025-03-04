@@ -1,6 +1,4 @@
 streamlit
 pandas
-rich
-markdown-it-py
-mdurl
-pygments
+langdetect
+googletrans==4.0.0-rc1
