@@ -39,17 +39,24 @@ if "submitted" not in st.session_state:
     st.session_state.submitted = False
 if "text_input" not in st.session_state:
     st.session_state.text_input = ""
+if "page" not in st.session_state:
+    st.session_state.page = "login"
+
+# Page Navigation Function
+def set_page(page_name):
+    st.session_state.page = page_name
+    st.rerun()
 
 # Login & Signup Page
-if not st.session_state.authenticated:
+if st.session_state.page == "login":
     st.title("🔐 Welcome to Text Analysis & Translator")
     st.subheader("Login & Signup")  
-    
     auth_option = st.radio("Choose an option:", ["Login", "Signup"])
 
+    email = st.text_input("📧 Email")
+    password = st.text_input("🔑 Password", type="password")
+
     if auth_option == "Signup":
-        email = st.text_input("📧 Email")
-        password = st.text_input("🔑 Password", type="password")
         if st.button("Signup"):
             if signup(email, password):
                 st.success("✅ Account created successfully! Please login.")
@@ -57,18 +64,15 @@ if not st.session_state.authenticated:
                 st.error("❌ Email already exists!")
 
     elif auth_option == "Login":
-        email = st.text_input("📧 Email")
-        password = st.text_input("🔑 Password", type="password")
-        
         if st.button("Login"):
             if login(email, password):
                 st.session_state.authenticated = True
-                st.rerun()
+                set_page("analysis")
             else:
                 st.error("❌ Invalid Email or Password")
 
 # App Content After Login
-if st.session_state.authenticated:
+if st.session_state.authenticated and st.session_state.page == "analysis":
     st.title("🌍 Text Analysis & Translator")
     
     tab1, tab2 = st.tabs(["📊 Text Analysis", "🌍 Translation"])
@@ -119,10 +123,8 @@ if st.session_state.authenticated:
             df_results = analyze_text(st.session_state.text_input)
             st.subheader("📌 Analysis Results")
             st.dataframe(df_results, use_container_width=True)
-            if st.button("Add New Text"):
-                st.session_state.text_input = ""
-                st.session_state.submitted = False
-                st.rerun()
+            if st.button("Proceed to Translation"):
+                set_page("translation")
 
     with tab2:
         st.subheader("🌍 AI-Powered Text Translator")
@@ -157,4 +159,5 @@ if st.session_state.authenticated:
                 translated_text = translate_text(input_text, target_language)
                 st.success("✅ Translation Completed!")
                 st.markdown(f"**📜 Translated Text:**\n\n{translated_text}")
-                st.markdown("### 🎉 Thank You for Using the Translator! 🌍")
+                if st.button("Thank You, Go to Home Page"):
+                    set_page("analysis")
